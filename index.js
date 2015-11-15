@@ -1,5 +1,6 @@
 var Promise 	= require('bluebird');
 var express 	= require('express');
+var bodyParser 	= require("body-parser");
 var Busboy 		= require('busboy');
 var fs 			= Promise.promisifyAll(require('fs'));
 var fileHash 	= require('./lib/file-hash');
@@ -9,6 +10,7 @@ var passcode = '[some unique code]';
 
 var app = express();
 
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/i', express.static(imageDir));
 
 app.get('/', function(req, res) {
@@ -16,19 +18,13 @@ app.get('/', function(req, res) {
 });
 
 app.post('/upload', function(req, res) {
-	if (req.files.length > 1) {
+	if (req.body.passcode !== passcode) {
 		res.writeHead(500);
-		res.send("Error: Only one file can be uploaded at a time");
-		return;
-	}
-
-	if (req.param('passcode') !== passcode) {
-		res.writeHead(500);
-		res.send("Error: Invalid passcode");
+		res.end("Error: Invalid passcode");
 		return;	
 	}
 
-	var busboy = new Busboy({ headers: req.headers });
+	var busboy = new Busboy({ headers: req.headers, limits: { files: 1 } });
 
 	var ext = null;
 
@@ -37,7 +33,7 @@ app.post('/upload', function(req, res) {
 
 		if (!~validTypes.indexOf(mimetype)) {
 			res.writeHead(500);
-			res.send("Error: Invalid MIME-type");
+			res.end("Error: Invalid MIME-type");
 			return;
 		}
 
