@@ -5,16 +5,29 @@ var fs 			= Promise.promisifyAll(require('fs'));
 var fileHash 	= require('./lib/file-hash');
 
 var imageDir = __dirname + '/images';
+var passcode = '[some unique code]';
 
 var app = express();
 
-app.use('/images', express.static(imageDir));
+app.use('/i', express.static(imageDir));
 
 app.get('/', function(req, res) {
-	res.send('img-service is running');
+	res.send('img-service is running. More info at https://github.com/ts95/img-service');
 });
 
 app.post('/upload', function(req, res) {
+	if (req.files.length > 1) {
+		res.writeHead(500);
+		res.send("Error: Only one file can be uploaded at a time");
+		return;
+	}
+
+	if (req.param('passcode') !== passcode) {
+		res.writeHead(500);
+		res.send("Error: Invalid passcode");
+		return;	
+	}
+
 	var busboy = new Busboy({ headers: req.headers });
 
 	var ext = null;
@@ -24,7 +37,7 @@ app.post('/upload', function(req, res) {
 
 		if (!~validTypes.indexOf(mimetype)) {
 			res.writeHead(500);
-			res.end("Invalid MIME-type");
+			res.send("Error: Invalid MIME-type");
 			return;
 		}
 
@@ -54,7 +67,7 @@ app.post('/upload', function(req, res) {
 					});
 			})
 			.then(function(filename) {
-				res.redirect(req.protocol + '://' + req.get('host') + '/images/' + filename);
+				res.send(req.protocol + '://' + req.get('host') + '/i/' + filename);
 			})
 			.catch(function(err) {
 				console.error(err);
