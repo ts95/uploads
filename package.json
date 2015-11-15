@@ -22,9 +22,8 @@
   "homepage": "https://github.com/ts95/img-service",
   "dependencies": {
     "bluebird": "^3.0.5",
-    "body-parser": "^1.14.1",
-    "busboy": "^0.2.12",
     "express": "^4.13.3",
+    "multer": "^1.1.0",
     "read-chunk": "^1.0.1",
     "shorthash": "0.0.2"
   }
