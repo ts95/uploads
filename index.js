@@ -9,7 +9,7 @@ var passcode = '[some unique code]';
 
 var app = express();
 
-app.use('/img', express.static(imageDir));
+app.use('/i', express.static(imageDir));
 
 var upload = multer({ dest: imageDir });
 
@@ -40,7 +40,7 @@ app.post('/upload', upload.single('image'), function(req, res) {
 		.then(function(hash) {
 			var uploadedFilename = hash + ext;
 			var destFilename = imageDir + '/' + uploadedFilename;
-			if (fs.existsSync(destFilename)) {
+			if (!fs.existsSync(destFilename)) {
 				fs.createReadStream(filename).pipe(fs.createWriteStream(destFilename));
 			}
 			return fs.unlinkAsync(filename)
@@ -49,7 +49,7 @@ app.post('/upload', upload.single('image'), function(req, res) {
 				});
 		})
 		.then(function(uploadedFilename) {
-			res.send(req.protocol + '://' + req.get('host') + '/img/' + uploadedFilename);
+			res.send(req.protocol + '://' + req.get('host') + '/i/' + uploadedFilename);
 		})
 		.catch(function(err) {
 			console.error(err);
