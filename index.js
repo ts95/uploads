@@ -9,7 +9,7 @@ var passcode = '[some unique code]';
 
 var app = express();
 
-app.use('/i', express.static(imageDir));
+app.use('/img', express.static(imageDir));
 
 var upload = multer({ dest: imageDir });
 
@@ -48,8 +48,8 @@ app.post('/upload', upload.single('image'), function(req, res) {
 					return Promise.resolve(uploadedFilename);
 				});
 		})
-		.then(function(filename) {
-			res.send(req.protocol + '://' + req.get('host') + '/i/' + filename);
+		.then(function(uploadedFilename) {
+			res.send(req.protocol + '://' + req.get('host') + '/img/' + uploadedFilename);
 		})
 		.catch(function(err) {
 			console.error(err);
