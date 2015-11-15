@@ -1,0 +1,30 @@
+{
+  "name": "img-service",
+  "version": "1.0.0",
+  "description": "HTTP service for uploading images.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ts95/img-service"
+  },
+  "keywords": [
+    "image",
+    "upload"
+  ],
+  "author": "Toni Sučić <toni.sucic@icloud.com> (https://github.com/ts95)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ts95/img-service/issues"
+  },
+  "homepage": "https://github.com/ts95/img-service",
+  "dependencies": {
+    "bluebird": "^3.0.5",
+    "busboy": "^0.2.12",
+    "express": "^4.13.3",
+    "read-chunk": "^1.0.1",
+    "shorthash": "0.0.2"
+  }
+}
