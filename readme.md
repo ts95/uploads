@@ -8,10 +8,7 @@ A simple image hosting service.
 * gif
 * webm
 
-### Automatic conversion
-If you upload a mov file it will be converted to a webm file.
-
-# Routes
+## Routes
 * GET   /
 * POST  /upload
 * POST  /delete

@@ -100,9 +100,6 @@ app.post('/delete', function(req, res) {
 				return Promise.reject(new Error("This file doesn't exist"));
 			}
 
-			return Promise.resolve();
-		})
-		.then(function() {
 			return fs.unlinkAsync(filename);
 		})
 		.then(function() {
