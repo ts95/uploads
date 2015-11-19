@@ -7,6 +7,7 @@ A simple image hosting service.
 * jpg
 * gif
 * webm
+* mp4
 
 ## Routes
 * GET   /
