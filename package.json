@@ -1,32 +1,54 @@
 {
-  "name": "img-service",
-  "version": "1.0.0",
-  "description": "HTTP service for uploading images.",
+  "name": "uploads",
+  "version": "1.1.0",
+  "description": "File uploading service",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ts95/img-service"
+    "url": "https://github.com/ts95/uploads"
   },
   "keywords": [
     "image",
+    "file",
     "upload"
   ],
   "author": "Toni Sučić <toni.sucic@icloud.com> (https://github.com/ts95)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ts95/img-service/issues"
+    "url": "https://github.com/ts95/uploads/issues"
   },
-  "homepage": "https://github.com/ts95/img-service",
+  "homepage": "https://github.com/ts95/uploads",
   "dependencies": {
+    "bcryptjs": "^2.3.0",
     "bluebird": "^3.0.5",
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
+    "express-session": "^1.12.1",
     "file-type": "^3.3.0",
+    "form-urlencoded": "^0.1.5",
+    "history": "^1.13.1",
+    "moment": "^2.10.6",
     "multer": "^1.1.0",
+    "pretty-bytes": "^3.0.0",
+    "promise-mysql": "^1.1.1",
+    "react": "^0.14.3",
+    "react-dom": "^0.14.3",
+    "react-router": "^1.0.2",
     "read-chunk": "^1.0.1",
+    "session-file-store": "0.0.24",
     "shorthash": "0.0.2"
+  },
+  "devDependencies": {
+    "browserify": "^12.0.1",
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-streamify": "^1.0.2",
+    "gulp-uglify": "^1.5.1",
+    "reactify": "^1.1.1",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.6.1"
   }
 }
