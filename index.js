@@ -19,8 +19,7 @@ var config          = require('./config/config');
 
 var uploadsDir = path.join(__dirname, 'files');
 var publicDir = path.join(__dirname, 'public');
-var port = process.env.UPLOADS_PORT || 8000;
-var secret = process.env.UPLOADS_SECRET || 'toni liker kake';
+
 var forceHTTPS = false;
 
 function fail(res, err, httpErrorCode) {
@@ -52,7 +51,7 @@ mysql.createConnection(config.db).then(function(conn) {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(session({
         store: new FileStore(),
-        secret: secret,
+        secret: config.secret,
         ttl: 31556926 /* 1 year in seconds */,
         resave: false,
         saveUninitialized: true,
@@ -160,7 +159,7 @@ mysql.createConnection(config.db).then(function(conn) {
         res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
     });
 
-    var server = app.listen(port, function() {
+    var server = app.listen(config.port, function() {
         var host = server.address().address;
         var port = server.address().port;
 

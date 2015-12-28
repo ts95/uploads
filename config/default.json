@@ -1,4 +1,6 @@
 {
+    "port": 8000,
+    "secret": "toni liker kake",
     "db": {
         "host": "localhost",
         "user": "root",
