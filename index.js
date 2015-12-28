@@ -15,6 +15,7 @@ var fs              = Promise.promisifyAll(require('fs'));
 var DB              = require('./db/db');
 var localize        = require('./localization/localize').server;
 var supportedLangs  = require('./localization/localize').supported;
+var config          = require('./config/config');
 
 var uploadsDir = path.join(__dirname, 'files');
 var publicDir = path.join(__dirname, 'public');
@@ -32,14 +33,7 @@ function fail(res, err, httpErrorCode) {
     }));
 }
 
-var connectionOptions = {
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'uploads',
-};
-
-mysql.createConnection(connectionOptions).then(function(conn) {
+mysql.createConnection(config.db).then(function(conn) {
     var db = new DB(conn);
 
     // Delete old files

@@ -2,3 +2,4 @@ node_modules/
 files/
 public/js/main.js
 sessions/
+config/custom.json
