@@ -13,6 +13,9 @@ INSERT INTO user VALUES(
 );
 ```
 
+## Dependencies
+Run `sudo npm install` and `gulp` in the project root.
+
 ## Configuration
 By default the configuration in config/default.json will be used. Custom
 configuration can be provided by making a config/custom.json file.
