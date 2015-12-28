@@ -9,21 +9,24 @@ var path            = require('path');
 var session         = require('express-session');
 var FileStore       = require('session-file-store')(session);
 var mysql           = require('promise-mysql');
+var locale          = require('locale');
 
 var fs              = Promise.promisifyAll(require('fs'));
 var DB              = require('./db/db');
+var localize        = require('./localization/localize').server;
+var supportedLangs  = require('./localization/localize').supported;
 
 var uploadsDir = path.join(__dirname, 'files');
 var publicDir = path.join(__dirname, 'public');
-var passcode = process.env.UPLOADS_PASSCODE || 'ayy lmao';
 var port = process.env.UPLOADS_PORT || 8000;
+var secret = process.env.UPLOADS_SECRET || 'toni liker kake';
 var forceHTTPS = false;
 
-function fail(res, err) {
+function fail(res, err, httpErrorCode) {
     console.error(err);
     console.trace();
 
-    res.writeHead(200);
+    res.writeHead(httpErrorCode || 200);
     res.end(JSON.stringify({
         error: (err.message || err),
     }));
@@ -39,29 +42,43 @@ var connectionOptions = {
 mysql.createConnection(connectionOptions).then(function(conn) {
     var db = new DB(conn);
 
+    // Delete old files
+    setInterval(function() {
+        db.getOutdatedFiles()
+            .then(files => {
+                return Promise.all(Promise.map(files, file => db.deleteFile(file.fhash)));
+            })
+            .catch(err => console.error(err));
+    }, 1000 * 60 * 60 * 24);
+
     var app = express();
 
-    app.use('/u', express.static(uploadsDir));
+    app.use('/!', express.static(uploadsDir));
     app.use('/public', express.static(publicDir));
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(session({
         store: new FileStore(),
-        secret: 'a78hjp0koainsbvaohu9p8',
+        secret: secret,
+        ttl: 31556926 /* 1 year in seconds */,
         resave: false,
         saveUninitialized: true,
     }));
+    app.use(locale(supportedLangs));
+    app.use(function(req, res, next) {
+        localize.setLocale(req.locale);
+        next();
+    });
 
     var upload = multer({ dest: uploadsDir });
 
     app.post('/api/upload', upload.single('file'), function(req, res) {
-        if (!req.session.auth) return fail(res, new Error("Not logged in"));
+        if (!req.session.auth) return fail(res, new Error(localize.translate("Not logged in")));
 
         db.addFile(req.file, req.session.auth.username)
             .then(function(uploadedFilename) {
-                console.log(uploadedFilename + " successfully uploaded");
                 var protocol = forceHTTPS ? 'https' : req.protocol;
                 var host = req.get('host');
-                res.send({ success: `${protocol}://${host}/u/${uploadedFilename}` });
+                res.send({ success: `${protocol}://${host}/!/${uploadedFilename}` });
             })
             .catch(function(err) {
                 fail(res, err);
@@ -75,15 +92,16 @@ mysql.createConnection(connectionOptions).then(function(conn) {
     });
 
     app.post('/api/delete', function(req, res) {
-        if (!req.session.auth) return fail(res, new Error("Not logged in"));
+        if (!req.session.auth) return fail(res, new Error(localize.translate("Not logged in")));
 
-        db.deleteFile(req.body.fhash, req.session.auth.username)
-            .then(function() {
-                var msg = `File successfully deleted`;
-                console.log(msg);
-                res.send({
-                    success: msg,
-                });
+        db.verifyFileOwner(req.body.fhash, req.session.auth.username)
+            .then(isOwner => {
+                if (isOwner) {
+                    return db.deleteFile(req.body.fhash)
+                        .then(() => res.send({ success: localize.translate("File successfully deleted") }));
+                } else {
+                    return Promise.reject(new Error(localize.translate("You are not the owner of this file")));
+                }
             })
             .catch(function(err) {
                 fail(res, err);
@@ -97,19 +115,23 @@ mysql.createConnection(connectionOptions).then(function(conn) {
         var password = req.body.password;
 
         if (sess.auth) {
-            res.send({ success: { username: username } });
+            res.send({ success: sess.auth });
         } else {
             db.validateUser(username, password)
                 .then(function(isValid) {
                     if (isValid) {
                         sess.auth = { username: username };
-                        res.send({ success: { username: username  } });
+                        res.send({ success: sess.auth });
                     } else {
-                        res.send({ error: 'Invalid credentials' });
+                        res.send({ error: localize.translate("Invalid credentials") });
                     }
                 })
                 .catch(function(err) {
-                    fail(res, err);
+                    if (err === "This user does not exist") {
+                        fail(res, new Error(localize.translate("This user does not exist")));
+                    } else {
+                        fail(res, err);
+                    }
                 });
         }
     });
@@ -117,26 +139,27 @@ mysql.createConnection(connectionOptions).then(function(conn) {
     app.get('/api/logout', function(req, res) {
         var sess = req.session;
 
-        if (sess.auth) {
+        if (sess.auth)
             sess.auth = undefined;
-        }
 
-        res.send({ success: 'Logged out' });
+        res.send({ success: localize.translate("Logged out") });
     });
 
-    app.get('/api/auth', function(req, res) {
-        res.send({ success: req.session.auth || null  });
-    });
+    app.get('/api/history/:count?', function(req, res) {
+        if (!req.session.auth) return fail(res, new Error(localize.translate("Not logged in")));
 
-    app.get('/api/history', function(req, res) {
-        if (!req.session.auth) return fail(res, new Error("Not logged in"));
-        db.getLastFiles(req.session.auth.username)
+        db.getLastFiles(req.session.auth.username, req.params.count)
             .then(files => {
                 res.send({ success: files });
             })
             .catch(err => {
                 fail(res, err);
             });
+    });
+
+    app.get('/api/auth', function(req, res) {
+        var auth = req.session.auth;
+        res.send({ success: auth || null });
     });
 
     app.get('*', function(req, res) {

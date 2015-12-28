@@ -20,6 +20,3 @@ CREATE TABLE file (
     PRIMARY KEY(fhash),
     FOREIGN KEY(uploaded_by) REFERENCES user(username)
 );
-
-
-INSERT INTO user VALUES('toni', '$2y$10$fR3ZI9uTO5g0nV//QjCcQuMovLd36lH6nhMs/2yqgsrNLKWhj79um');

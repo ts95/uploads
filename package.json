@@ -30,6 +30,8 @@
     "file-type": "^3.3.0",
     "form-urlencoded": "^0.1.5",
     "history": "^1.13.1",
+    "locale": "0.0.20",
+    "localize": "^0.4.7",
     "moment": "^2.10.6",
     "multer": "^1.1.0",
     "pretty-bytes": "^3.0.0",

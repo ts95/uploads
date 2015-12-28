@@ -28,7 +28,7 @@ DB.prototype.validateUser = function(username, password) {
     return this.conn.query('SELECT password FROM user WHERE username = ?', [username])
         .then(rows => {
             if (rows.length === 0)
-                return Promise.reject("This user does not exist.");
+                return Promise.reject("This user does not exist");
             return Promise.resolve(rows[0]);
         })
         .then(user => {
@@ -40,7 +40,7 @@ DB.prototype.getUser = function(username) {
     return this.conn.query('SELECT username FROM user WHERE username = ?', [username])
         .then(rows => {
             if (rows.length === 0)
-                return Promise.reject("This user does not exist.");
+                return Promise.reject("This user does not exist");
             return Promise.resolve(rows[0]);
         });
 };
@@ -82,19 +82,27 @@ DB.prototype.addFile = function(file, username) {
                                     uploaded_by: username,
                                 };
                                 return this.conn.query('INSERT INTO file SET ?', set)
-                                    .then(function() {
+                                    .then(() => {
                                         return Promise.resolve(uploadedFilename);
                                     });
                             } else {
-                                return Promise.resolve(uploadedFilename);
+                                return this.conn.query('UPDATE file SET uploaded_at = NOW() WHERE fhash = ?', [hash])
+                                    .then(() => uploadedFilename);
                             }
                         });
                 });
-        })
+        });
 };
 
-DB.prototype.deleteFile = function(fhash, username) {
-    return this.conn.query('SELECT fname FROM file WHERE fhash = ? AND uploaded_by = ?', [fhash, username])
+DB.prototype.verifyFileOwner = function(fhash, username) {
+    return this.conn.query('SELECT fhash FROM file WHERE fhash = ? AND uploaded_by = ?', [fhash, username])
+        .then(files => {
+            return Promise.resolve(files.length > 0);
+        });
+};
+
+DB.prototype.deleteFile = function(fhash) {
+    return this.conn.query('SELECT fname FROM file WHERE fhash = ?', [fhash])
         .then(files => {
             if (files.length === 0)
                 return Promise.reject(new Error("This file does not exist"));
@@ -105,12 +113,19 @@ DB.prototype.deleteFile = function(fhash, username) {
             return fs.unlinkAsync(filename);
         })
         .then(() => {
-            return this.conn.query('DELETE FROM file WHERE fhash = ? AND uploaded_by = ?', [fhash, username]);
+            return this.conn.query('DELETE FROM file WHERE fhash = ?', [fhash]);
         });
 };
 
-DB.prototype.getLastFiles = function(username) {
-    return this.conn.query('SELECT * FROM file WHERE uploaded_by = ? ORDER BY uploaded_at DESC LIMIT 100', [username]);
+DB.prototype.getLastFiles = function(username, count) {
+    count = (count|0) || 100;
+    if (count < 1 || count > 100)
+        return Promise.reject(new Error('Invalid count ' + count));
+    return this.conn.query('SELECT * FROM file WHERE uploaded_by = ? ORDER BY uploaded_at DESC LIMIT ?', [username, count]);
+};
+
+DB.prototype.getOutdatedFiles = function() {
+    return this.conn.query('SELECT * FROM file WHERE uploaded_at < NOW() - INTERVAL 1 MONTH');
 };
 
 module.exports = DB;
