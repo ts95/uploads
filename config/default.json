@@ -1,6 +1,7 @@
 {
     "port": 8000,
     "secret": "toni liker kake",
+    "forceHTTPS": false,
     "db": {
         "host": "localhost",
         "user": "root",

@@ -20,8 +20,6 @@ var config          = require('./config/config');
 var uploadsDir = path.join(__dirname, 'files');
 var publicDir = path.join(__dirname, 'public');
 
-var forceHTTPS = false;
-
 function fail(res, err, httpErrorCode) {
     console.error(err);
     console.trace();
@@ -69,7 +67,7 @@ mysql.createConnection(config.db).then(function(conn) {
 
         db.addFile(req.file, req.session.auth.username)
             .then(function(uploadedFilename) {
-                var protocol = forceHTTPS ? 'https' : req.protocol;
+                var protocol = config.forceHTTPS ? 'https' : req.protocol;
                 var host = req.get('host');
                 res.send({ success: `${protocol}://${host}/!/${uploadedFilename}` });
             })
