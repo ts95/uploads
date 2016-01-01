@@ -50,9 +50,9 @@ mysql.createConnection(config.db).then(function(conn) {
     app.use(session({
         store: new FileStore(),
         secret: config.secret,
-        ttl: 31556926 /* 1 year in seconds */,
+        ttl: 2629743 /* 1 month in seconds */,
         resave: false,
-        saveUninitialized: true,
+        saveUninitialized: false,
     }));
     app.use(locale(supportedLangs));
     app.use(function(req, res, next) {
