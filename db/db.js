@@ -48,27 +48,17 @@ DB.prototype.getUser = function(username) {
 DB.prototype.addFile = function(file, username) {
     return Promise.resolve()
         .then(() => {
-            if (!file) {
+            if (!file)
                 return Promise.reject(new Error("No file was provided"));
-            }
-
-            return readChunkAsync(file.path, 0, 262);
-        })
-        .then(buffer => {
-            return Promise.resolve(filetype(buffer));
-        })
-        .then(type => {
-            var invalidExts = ['exe'];
-
-            if (!!~invalidExts.indexOf(type.ext)) {
-                return Promise.reject(new Error(`Invalid file type: ${type.mime} (${type.ext})`));
-            }
 
             return fileHash(fs.createReadStream(file.path))
                 .then(hash => {
                     return this.conn.query('SELECT fname FROM file WHERE fhash = ?', [hash])
                         .then(files => {
-                            var uploadedFilename = `${hash}.${type.ext}`;
+                            var ext = /.+(\.[a-z0-9]{3,4})/.exec(file.originalname)[1];
+                            if (!ext)
+                                return Promise.reject("This file lacks a file extension");
+                            var uploadedFilename = hash + ext;
                             if (files.length === 0) {
                                 var destFilename = path.join(__dirname, '../files', uploadedFilename);
                                 if (!fs.existsSync(destFilename)) {
