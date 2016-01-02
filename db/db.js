@@ -1,11 +1,9 @@
 'use strict';
 
 var Promise         = require('bluebird');
-var filetype        = require('file-type');
 var path            = require('path');
 var bcrypt          = Promise.promisifyAll(require('bcryptjs'));
 var fs              = Promise.promisifyAll(require('fs'));
-var readChunkAsync  = Promise.promisify(require('read-chunk'));
 var fileHash        = require('../lib/file-hash');
 
 var DB = function(conn) {

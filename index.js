@@ -10,6 +10,7 @@ var session         = require('express-session');
 var FileStore       = require('session-file-store')(session);
 var mysql           = require('promise-mysql');
 var locale          = require('locale');
+var favicon         = require('serve-favicon');
 
 var fs              = Promise.promisifyAll(require('fs'));
 var DB              = require('./db/db');
@@ -46,6 +47,7 @@ mysql.createConnection(config.db).then(function(conn) {
 
     app.use('/!', express.static(uploadsDir));
     app.use('/public', express.static(publicDir));
+    app.use(favicon(path.join(publicDir, 'favicon.ico')));
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(session({
         store: new FileStore(),
