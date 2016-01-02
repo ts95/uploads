@@ -4,7 +4,6 @@ var Promise         = require('bluebird');
 var express         = require('express');
 var multer          = require('multer');
 var bodyParser      = require('body-parser');
-var filetype        = require('file-type');
 var path            = require('path');
 var session         = require('express-session');
 var FileStore       = require('session-file-store')(session);
