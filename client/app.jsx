@@ -190,10 +190,17 @@ var UploadForm = React.createClass({
 });
 
 var History = React.createClass({
+    getInitialState: function() {
+        return { auth: null };
+    },
+    authChangeHandler: function(auth) {
+        this.setState({ auth: auth });
+    },
     render: function() {
         return (
             <div>
-                <UploadTable/>
+                <LoginForm onAuthChange={this.authChangeHandler}/>
+                {this.state.auth ? <UploadTable/> : null}
             </div>
         );
     }

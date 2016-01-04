@@ -6,7 +6,7 @@ var multer          = require('multer');
 var bodyParser      = require('body-parser');
 var path            = require('path');
 var session         = require('express-session');
-var FileStore       = require('session-file-store')(session);
+var sessions        = require("client-sessions");
 var mysql           = require('promise-mysql');
 var locale          = require('locale');
 var favicon         = require('serve-favicon');
@@ -49,9 +49,9 @@ mysql.createConnection(config.db).then(function(conn) {
     app.use(favicon(path.join(publicDir, 'favicon.ico')));
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(session({
-        store: new FileStore(),
+        cookieName: 'session',
         secret: config.secret,
-        reapInterval: -1,
+        duration: 31556926000 /* 1 year in ms */,
         resave: false,
         saveUninitialized: false,
     }));
