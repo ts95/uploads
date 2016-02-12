@@ -64,20 +64,34 @@ mysql.createConnection(config.db).then(function(conn) {
     var upload = multer({ dest: uploadsDir });
 
     app.post('/api/upload', upload.single('file'), function(req, res) {
-        if (!req.session.auth) return fail(res, new Error(localize.translate("Not logged in")));
+        var username = req.body.usr;
+        var password = req.body.pwd;
 
-        db.addFile(req.file, req.session.auth.username)
-            .then(function(uploadedFilename) {
+        var authFuture = username ?
+            db.validateUser(username, password) :
+            Promise.resolve(!!req.session.auth);
+
+        authFuture
+            .then(isAuthorized => {
+                if (!isAuthorized) {
+                    return Promise.reject(new Error(localize.translate("Not logged in")));
+                }
+                return Promise.resolve();
+            })
+            .then(() => {
+                return db.addFile(req.file, username || req.session.auth.username);
+            })
+            .then(uploadedFilename => {
                 var protocol = config.forceHTTPS ? 'https' : req.protocol;
                 var host = req.get('host');
                 res.send({ success: `${protocol}://${host}/!/${uploadedFilename}` });
             })
-            .catch(function(err) {
+            .catch(err => {
                 fail(res, err);
             })
-            .finally(function() {
+            .finally(() => {
                 fs.unlinkAsync(req.file.path)
-                    .catch(function() {
+                    .catch(() => {
                         console.error("Failed to unlink file: " + req.file.path);
                     });
             });
