@@ -106,8 +106,8 @@ DB.prototype.deleteFile = function(fhash) {
 };
 
 DB.prototype.getLastFiles = function(username, count) {
-    count = (count|0) || 100;
-    if (count < 1 || count > 100)
+    count = (count|0) || 500;
+    if (count < 1 || count > 1000)
         return Promise.reject(new Error('Invalid count ' + count));
     return this.conn.query('SELECT * FROM file WHERE uploaded_by = ? ORDER BY uploaded_at DESC LIMIT ?', [username, count]);
 };
