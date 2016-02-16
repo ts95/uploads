@@ -55,7 +55,7 @@ var LoginForm = React.createClass({
     },
     loginHandler: function(e) {
         e.preventDefault();
-        
+
         var _this = this;
 
         var req = new XMLHttpRequest();
@@ -200,7 +200,7 @@ var History = React.createClass({
         return (
             <div>
                 <LoginForm onAuthChange={this.authChangeHandler}/>
-                {this.state.auth ? <UploadTable/> : null}
+                {this.state.auth ? <UploadTable count={500}/> : null}
             </div>
         );
     }
